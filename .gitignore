@@ -14,3 +14,4 @@ build/
 *.json
 prev
 last
+status.txt
