@@ -1,15 +1,16 @@
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium import webdriver
-import time
-import json
 from selenium.common.exceptions import NoSuchElementException
 from datetime import datetime
 import boto3
+import time
+import json
 from botocore.exceptions import NoCredentialsError
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 import os
+
 
 def read_last_data_as_json(bucket):
     return read_json_data(bucket, 'last.json')
@@ -248,10 +249,9 @@ def compare_grades(prev, current):
 
 # scrape shkolo web site
 result = scrape_shkolo()
-current_data = format_current_term_grades(result, 'term2')
-
 json_str = json.dumps(result, indent=4, ensure_ascii=False)
-print(json_str)
+current_term_data = format_current_term_grades(result, 'term2')
+print(current_term_data)
 
 # Format the date as YYYY-MM-DD
 current_date = datetime.now()
@@ -262,7 +262,7 @@ with open(filename, 'w', encoding='utf-8') as file:
     json.dump(result, file, indent=4, ensure_ascii=False)
 print(f"Data saved to {filename}")
 with open('last.json', 'w', encoding='utf-8') as file:
-    json.dump(current_data, file, indent=4, ensure_ascii=False)
+    json.dump(current_term_data, file, indent=4, ensure_ascii=False)
 
 # upload
 bucket = 'shkolo-api'
@@ -291,13 +291,13 @@ else:
 
 uploaded = upload_to_s3('last.json', bucket, 'last.json')
 
-
 # format date string in yyyy-mm-dd to human readable text contains the day, month and year
 prev = datetime.strptime(prev_date, "%Y-%m-%d").strftime("%d %B %Y")
 now = current_date.strftime("%d %B %Y")
-status_header = "Status as of " + now + " comparing with " + prev + "\n"
+status_header = "Status as of " + now + " comparing with " + prev + ".\n"
 
-status = status_header + compare_grades(prev_data, current_data)
+# compare with langchain
+status = status_header + compare_grades(prev_data, current_term_data)
 print(status)
 upload_status_to_s3(bucket, status)
 
