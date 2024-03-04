@@ -133,7 +133,6 @@ def scrape_shkolo():
     for rank_box in rank_boxes:
         stats_rank = rank_box.find_element(By.XPATH, './/div[@class="stats-rank"]').text.strip()
         stats_label = rank_box.find_element(By.XPATH, './/div[@class="stats-label"]').text.strip()
-        #ranks.append({'stats_rank': stats_rank.text.strip(), 'stats_label': stats_label.text.strip()})
         statistics[stats_label] = stats_rank
 
     print(statistics)
@@ -141,10 +140,10 @@ def scrape_shkolo():
 
     # Find the element with the text 'Успех'
     success_element = driver.find_element(By.XPATH, "//div[contains(text(), 'Успех')]")
-    success_element.click()
-    # print("Clicked on 'Успех'")
+    if success_element:
+        success_element.click()
 
-    time.sleep(5)
+    time.sleep(10)
 
     driver.get("https://app.shkolo.bg/ajax/diary/getGradesForPupil?fromDate=&toDate=&type=0&previousMonth=0&currentMonth=0&currentWeek=0&currentDay=0&includeDeleted=0&pupil_id=2300566279&_=1709021739855")
     time.sleep(5)
@@ -274,7 +273,8 @@ print(f'Last uploaded date: {last_date}')
 prev_data = {}
 
 if last_date != formatted_date:
-    print("Different date. Move last to prev and save new date.")
+    prev_date = last_date
+    print("Different date. Move last to prev and save new date. Prev: " + prev_date + " Last: " + formatted_date)
 
     # read last data and save it to prev
     prev_data = read_last_data_as_json(bucket)
