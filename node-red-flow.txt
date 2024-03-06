@@ -1,0 +1,160 @@
+[
+    {
+        "id": "911b4daf49c90483",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "ca05639257e27f2e",
+        "type": "amazon s3",
+        "z": "911b4daf49c90483",
+        "aws": "",
+        "bucket": "shkolo-api",
+        "filename": "status.txt",
+        "region": "",
+        "name": "status",
+        "x": 320,
+        "y": 140,
+        "wires": [
+            [
+                "6629c254badf017f"
+            ]
+        ]
+    },
+    {
+        "id": "64871a23d066ba6b",
+        "type": "debug",
+        "z": "911b4daf49c90483",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 640,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "09d61d57ce33d5bb",
+        "type": "inject",
+        "z": "911b4daf49c90483",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 140,
+        "y": 140,
+        "wires": [
+            [
+                "ca05639257e27f2e"
+            ]
+        ]
+    },
+    {
+        "id": "6629c254badf017f",
+        "type": "function",
+        "z": "911b4daf49c90483",
+        "name": "function 1",
+        "func": "msg.status = Buffer.from(msg.payload).toString();\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 260,
+        "wires": [
+            [
+                "64871a23d066ba6b",
+                "7ea328c5afcb2ff0"
+            ]
+        ]
+    },
+    {
+        "id": "7ea328c5afcb2ff0",
+        "type": "alexa-remote-routine",
+        "z": "911b4daf49c90483",
+        "name": "",
+        "account": "997f6205dac11c94",
+        "routineNode": {
+            "type": "speak",
+            "payload": {
+                "type": "regular",
+                "text": {
+                    "type": "msg",
+                    "value": "status"
+                },
+                "devices": [
+                    "G090XG0793832R79"
+                ]
+            }
+        },
+        "x": 620,
+        "y": 420,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c13d18a09bf0dfcf",
+        "type": "inject",
+        "z": "911b4daf49c90483",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "The differences in the grades statistics are:  - Success Rate: Decreased from 5.65 to 5.63 - Grades: Increased from 76 to 78 - Excessive Absences: No changes - Feedback: No changes - Control Tests: Increased from 6 to 7 - Parental Meetings: No changes - Position in the Class: No changes - Position in the Graduating Class: Decreased from 103 to 107  No changes in subjects.",
+        "payloadType": "str",
+        "x": 310,
+        "y": 420,
+        "wires": [
+            [
+                "6629c254badf017f"
+            ]
+        ]
+    },
+    {
+        "id": "997f6205dac11c94",
+        "type": "alexa-remote-account",
+        "name": "alexa",
+        "authMethod": "proxy",
+        "proxyOwnIp": "192.168.1.12",
+        "proxyPort": "3456",
+        "cookieFile": "autFile",
+        "refreshInterval": "10",
+        "alexaServiceHost": "pitangui.amazon.com",
+        "amazonPage": "amazon.com",
+        "acceptLanguage": "en-US",
+        "userAgent": "",
+        "useWsMqtt": "on",
+        "autoInit": "on"
+    }
+]

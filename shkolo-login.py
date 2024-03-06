@@ -5,8 +5,6 @@ from selenium.common.exceptions import NoSuchElementException
 import time
 import os
 
-url = 'https://app.shkolo.bg/dashboard/'
-
 options = Options()
 options.add_argument("Accept=text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
 options.add_argument("User-Agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
@@ -24,9 +22,11 @@ for cookie in individual_cookies:
     cookies.append({'name': name, 'value': value})
 
 driver = webdriver.Chrome(options=options)
-driver.get(url)
+driver.get('https://app.shkolo.bg')
 for cookie in cookies:
     driver.add_cookie(cookie)
+
+time.sleep(10)
 
 '''
 <form class="login-form" action="/auth/login" method="post" novalidate="novalidate">
@@ -54,20 +54,10 @@ for cookie in cookies:
                     <div class="form-actions" style="padding-bottom: 10px;">
                         <button type="submit" class="btn btn-lg btn-block uppercase btn-success">ВХОД</button>
                     </div>
-
-                    
-    
 </div>
                 </form>
 '''
-time.sleep(20)
-newcookies = driver.get_cookies()
-print('New cookies')
-# iterate each cookie and print their name and value
-for cookie in newcookies:
-    print(f'Name: {cookie["name"]}, Value: {cookie["value"]}')
 
-# try to find the login form
 try:
     _username = os.environ.get("SHKOLO_USER")
     _password = os.environ.get("SHKOLO_PASSWORD")
@@ -89,12 +79,10 @@ try:
         # get cookies value
         cookies = driver.get_cookies()
         cookies_string = '; '.join([f"{cookie['name']}={cookie['value']}" for cookie in cookies])
-        print(cookies_string)
-        #print(driver.page_source)
+ 
 except NoSuchElementException:
     print('Login form not found')
 
 time.sleep(20)
 driver.quit()
 print('Done')   
-

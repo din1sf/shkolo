@@ -52,14 +52,20 @@ def upload_to_s3(local_file, bucket, s3_file):
         print("Credentials not available")
         return False
     
-def scrape_shkolo():
-    url = 'https://app.shkolo.bg/dashboard/'
+def download_cookies_from_s3(bucket, key):
+    try:
+        s3 = boto3.client('s3')
+        s3.download_file(bucket, key, 'cookies.txt')
+        print('Cookies downloaded from s3') 
+    except FileNotFoundError:
+        print("The file was not found")
+    except NoCredentialsError:
+        print("Credentials not available")
 
-    options = Options()
-    options.add_argument("Accept=text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
-    options.add_argument("User-Agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
 
-    # load the cookie string from the file
+def load_cookies():
+    download_cookies_from_s3('shkolo-api', 'cookies.txt')
+
     with open('cookies.txt', 'r') as file:
         cookie_string = file.read()
     individual_cookies = cookie_string.split(';')
@@ -68,13 +74,24 @@ def scrape_shkolo():
         trimmed_cookie = cookie.strip()
         name, value = trimmed_cookie.split('=', 1)
         cookies.append({'name': name, 'value': value})
+    return cookies
+
+def scrape_shkolo():
+    url = 'https://app.shkolo.bg/dashboard/'
+
+    options = Options()
+    options.add_argument("Accept=text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
+    options.add_argument("User-Agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
+
+    # load the cookie string from the file
+    cookies = load_cookies()
 
     driver = webdriver.Chrome(options=options)
     driver.get(url)
     for cookie in cookies:
         driver.add_cookie(cookie)
 
-    time.sleep(20)
+    time.sleep(10)
 
     """
     <div class="col-md-2 col-sm-4 col-xs-6">
@@ -257,16 +274,17 @@ current_date = datetime.now()
 formatted_date = current_date.strftime("%Y-%m-%d")
 
 filename = formatted_date + '.json'
-with open(filename, 'w', encoding='utf-8') as file:
+filepath = './history/' + filename
+with open(filepath, 'w', encoding='utf-8') as file:
     json.dump(result, file, indent=4, ensure_ascii=False)
-print(f"Data saved to {filename}")
+print(f"Data saved to {filepath}")
 with open('last.json', 'w', encoding='utf-8') as file:
     json.dump(current_term_data, file, indent=4, ensure_ascii=False)
 
 # upload
 bucket = 'shkolo-api'
 
-uploaded = upload_to_s3(filename, bucket, filename)
+uploaded = upload_to_s3(filepath, bucket, filename)
 
 last_date = read_from_s3(bucket, 'last')
 print(f'Last uploaded date: {last_date}')
